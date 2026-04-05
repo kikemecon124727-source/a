@@ -105,11 +105,11 @@ const Catalogo = () => {
     return (
       <span
         key={colorName}
-        className={`inline-flex items-center ${sizeClasses} rounded-full font-medium bg-white/80 dark:bg-[#2a2a2a] text-gray-700 dark:text-[#d1d1d1] border border-gray-200/50 dark:border-[#3a3a3a]`}
+        className={`inline-flex items-center ${sizeClasses} rounded-full font-medium bg-white/80 dark:bg-[#2a2a2a] text-gray-700 dark:text-white border border-gray-200/50 dark:border-[#444444]`}
       >
         {colorHex && (
           <span
-            className={`${dotSize} rounded-full border border-gray-300 dark:border-[#555555] flex-shrink-0 shadow-sm`}
+            className={`${dotSize} rounded-full border border-gray-300 dark:border-[#666666] flex-shrink-0 shadow-sm`}
             style={{ background: colorHex }}
           />
         )}
@@ -119,10 +119,10 @@ const Catalogo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:bg-black">
       
       {/* Elegant Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-700">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-[#333333]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
@@ -258,7 +258,7 @@ const Catalogo = () => {
       </section>
 
       {/* Products Section */}
-      <section ref={productsRef} className="py-16 sm:py-24 px-4 sm:px-6 bg-[#F8F6F3] dark:bg-[#0a0a0a]">
+      <section ref={productsRef} className="py-16 sm:py-24 px-4 sm:px-6 bg-[#F8F6F3] dark:bg-black">
         <div className="max-w-7xl mx-auto">
           {/* Section Title */}
           <div className="text-center mb-12 sm:mb-16">
@@ -291,7 +291,7 @@ const Catalogo = () => {
                   {/* Product Card with white background */}
                   <div className="bg-white dark:bg-[#1a1a1a] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg dark:shadow-black/20 transition-all duration-300">
                     {/* Product Image */}
-                    <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-[#000000]">
+                    <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-black">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
@@ -351,14 +351,14 @@ const Catalogo = () => {
             >
               <button
                 onClick={closeProductModal}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#000000]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-[#d1d1d1]" />
               </button>
 
               <div className="flex flex-col sm:flex-row">
                 {/* Image Carousel */}
-                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#000000]">
+                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-black">
                   {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
                     <>
                       <img
