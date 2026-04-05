@@ -105,11 +105,11 @@ const Catalogo = () => {
     return (
       <span
         key={colorName}
-        className={`inline-flex items-center ${sizeClasses} rounded-full font-medium bg-white/80 dark:bg-[#2a2a2a] text-gray-700 dark:text-white border border-gray-200/50 dark:border-[#444444]`}
+        className={`inline-flex items-center ${sizeClasses} rounded-full font-medium bg-white/80 dark:bg-[#2d1f3f] text-gray-700 dark:text-white border border-gray-200/50 dark:border-[#4a3d5f]`}
       >
         {colorHex && (
           <span
-            className={`${dotSize} rounded-full border border-gray-300 dark:border-[#666666] flex-shrink-0 shadow-sm`}
+            className={`${dotSize} rounded-full border border-gray-300 dark:border-[#7a6b8f] flex-shrink-0 shadow-sm`}
             style={{ background: colorHex }}
           />
         )}
@@ -119,10 +119,10 @@ const Catalogo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:bg-black">
+    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#0a0a0a] dark:via-[#1a1520] dark:to-[#000000]">
       
       {/* Elegant Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-[#333333]">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-gray-100 dark:border-[#2d1f3f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
@@ -138,10 +138,10 @@ const Catalogo = () => {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={openSearch}
-                className="p-2.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded-full transition-colors"
+                className="p-2.5 hover:bg-gray-100 dark:hover:bg-[#2d1f3f] rounded-full transition-colors"
                 aria-label="Buscar"
               >
-                <Search className="w-5 h-5 text-gray-600 dark:text-[#d1d1d1]" />
+                <Search className="w-5 h-5 text-gray-600 dark:text-white" />
               </button>
               
               <ThemeToggle inline />
@@ -179,28 +179,28 @@ const Catalogo = () => {
           <div className="max-w-4xl mx-auto px-4 py-6 max-h-[calc(100vh-80px)] overflow-y-auto">
             {searchTerm.trim() === '' ? (
               <div className="text-center py-16">
-                <p className="text-gray-400 dark:text-[#666666] text-sm">
+                <p className="text-gray-400 dark:text-[#8b7a9f] text-sm">
                   Escribe para buscar productos por nombre o color
                 </p>
               </div>
             ) : searchResults.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-gray-500 dark:text-[#888888]">
+                <p className="text-gray-500 dark:text-[#9d8fb3]">
                   No se encontraron productos para "{searchTerm}"
                 </p>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-xs text-gray-400 dark:text-[#666666] mb-4 uppercase tracking-wider">
+                <p className="text-xs text-gray-400 dark:text-[#8b7a9f] mb-4 uppercase tracking-wider">
                   {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''}
                 </p>
                 {searchResults.map((product) => (
                   <button
                     key={product.id}
                     onClick={() => handleSearchSelect(product)}
-                    className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-[#0f0f0f] rounded-xl transition-colors text-left group"
+                    className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-[#1a1520] rounded-xl transition-colors text-left group"
                   >
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-[#0a0a0a] flex-shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-[#1a1520] flex-shrink-0">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
@@ -208,7 +208,7 @@ const Catalogo = () => {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#666666] text-xs">
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#6b5b7f] text-xs">
                           Sin imagen
                         </div>
                       )}
@@ -225,7 +225,7 @@ const Catalogo = () => {
                       )}
                     </div>
 
-                    <ChevronDown className="w-4 h-4 text-gray-400 dark:text-[#666666] -rotate-90 group-hover:translate-x-1 transition-transform" />
+                    <ChevronDown className="w-4 h-4 text-gray-400 dark:text-[#8b7a9f] -rotate-90 group-hover:translate-x-1 transition-transform" />
                   </button>
                 ))}
               </div>
@@ -241,7 +241,7 @@ const Catalogo = () => {
             <span className="block">JESSICA</span>
             <span className="block">ALESUAREZ</span>
           </h2>
-          <p className="text-gray-500 dark:text-[#888888] tracking-[0.1em] sm:tracking-[0.15em] uppercase text-[10px] sm:text-xs">
+          <p className="text-gray-500 dark:text-[#9d8fb3] tracking-[0.1em] sm:tracking-[0.15em] uppercase text-[10px] sm:text-xs">
             Descubre nuestro catálogo
           </p>
           
@@ -258,7 +258,7 @@ const Catalogo = () => {
       </section>
 
       {/* Products Section */}
-      <section ref={productsRef} className="py-16 sm:py-24 px-4 sm:px-6 bg-[#F8F6F3] dark:bg-black">
+      <section ref={productsRef} className="py-16 sm:py-24 px-4 sm:px-6 bg-[#F8F6F3] dark:bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto">
           {/* Section Title */}
           <div className="text-center mb-12 sm:mb-16">
@@ -275,7 +275,7 @@ const Catalogo = () => {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-gray-400 dark:text-[#666666] text-sm">
+              <p className="text-gray-400 dark:text-[#8b7a9f] text-sm">
                 No hay productos disponibles
               </p>
             </div>
@@ -289,9 +289,9 @@ const Catalogo = () => {
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {/* Product Card with white background */}
-                  <div className="bg-white dark:bg-[#1a1a1a] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg dark:shadow-black/20 transition-all duration-300">
+                  <div className="bg-white dark:bg-[#1a1520] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg dark:shadow-black/20 transition-all duration-300">
                     {/* Product Image */}
-                    <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-black">
+                    <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
@@ -299,7 +299,7 @@ const Catalogo = () => {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#666666] text-xs sm:text-sm">
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">
                           Sin imagen
                         </div>
                       )}
@@ -346,19 +346,19 @@ const Catalogo = () => {
         >
           <div className="min-h-full flex items-start sm:items-center justify-center p-0 sm:p-4">
             <div 
-              className="bg-white dark:bg-[#0f0f0f] w-full sm:max-w-4xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn"
+              className="bg-white dark:bg-[#1a1520] w-full sm:max-w-4xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={closeProductModal}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#0a0a0a]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
               >
-                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-[#d1d1d1]" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white" />
               </button>
 
               <div className="flex flex-col sm:flex-row">
                 {/* Image Carousel */}
-                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-black">
+                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a]">
                   {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
                     <>
                       <img
@@ -371,15 +371,15 @@ const Catalogo = () => {
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#1a1a1a]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                           >
-                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-[#d1d1d1] rotate-90" />
+                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white rotate-90" />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#1a1a1a]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                           >
-                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-[#d1d1d1] -rotate-90" />
+                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white -rotate-90" />
                           </button>
 
                           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -395,7 +395,7 @@ const Catalogo = () => {
                       )}
                     </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#666666]">
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f]">
                       Sin imagen
                     </div>
                   )}
@@ -408,7 +408,7 @@ const Catalogo = () => {
                   </h2>
 
                   {selectedProduct.descripcion && (
-                    <p className="text-gray-600 dark:text-[#d1d1d1] text-sm sm:text-base mb-5 leading-relaxed">
+                    <p className="text-gray-600 dark:text-[#c4b5d4] text-sm sm:text-base mb-5 leading-relaxed">
                       {selectedProduct.descripcion}
                     </p>
                   )}
@@ -416,7 +416,7 @@ const Catalogo = () => {
                   {/* Show ALL colors in modal too */}
                   {selectedProduct.colores && selectedProduct.colores.length > 0 && (
                     <div className="mb-5">
-                      <p className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-[#666666] mb-3">Colores disponibles</p>
+                      <p className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-[#8b7a9f] mb-3">Colores disponibles</p>
                       <div className="flex flex-wrap gap-2">
                         {selectedProduct.colores.map(c => renderColorBadge(c))}
                       </div>

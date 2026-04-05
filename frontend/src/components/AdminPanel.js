@@ -301,9 +301,9 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:bg-black">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#0a0a0a] dark:via-[#1a1520] dark:to-[#000000]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-[#333333]">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-gray-100 dark:border-[#2d1f3f]">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -311,17 +311,17 @@ const AdminPanel = () => {
                 <span className="hidden sm:inline">jessicaalesuarez</span>
                 <span className="sm:hidden">jessica</span>
               </h1>
-              <p className="text-xs text-gray-500 dark:text-[#888888] hidden sm:block">Panel de Administración</p>
+              <p className="text-xs text-gray-500 dark:text-[#9d8fb3] hidden sm:block">Panel de Administración</p>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs text-gray-500 dark:text-[#888888] hidden md:inline truncate max-w-[150px]">
+              <span className="text-xs text-gray-500 dark:text-[#9d8fb3] hidden md:inline truncate max-w-[150px]">
                 {user?.email}
               </span>
               <ThemeToggle inline />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-gray-600 dark:text-[#d1d1d1] hover:text-red-500 dark:hover:text-red-400 transition-all text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-gray-600 dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all text-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Salir</span>

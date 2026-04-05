@@ -25,15 +25,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:bg-black p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#0a0a0a] dark:via-[#1a1520] dark:to-[#000000] p-4">
       <div className="w-full max-w-sm">
-        <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-xl dark:shadow-black/20 p-6 sm:p-8 space-y-6 border border-gray-100 dark:border-[#333333]">
+        <div className="bg-white dark:bg-[#1a1520] rounded-2xl shadow-xl dark:shadow-black/20 p-6 sm:p-8 space-y-6 border border-gray-100 dark:border-[#2d1f3f]">
           {/* Logo/Title */}
           <div className="text-center space-y-2">
             <h1 className="text-xl sm:text-2xl font-light tracking-[0.15em] text-gray-800 dark:text-white uppercase" style={{ fontFamily: 'Georgia, serif' }}>
               JESSICAALESUAREZ
             </h1>
-            <p className="text-gray-500 dark:text-[#888888] text-xs tracking-wide">
+            <p className="text-gray-500 dark:text-[#9d8fb3] text-xs tracking-wide">
               Administración de Catálogo
             </p>
           </div>
@@ -47,7 +47,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#333333] bg-gray-50 dark:bg-[#0f0f0f] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-[#666666] focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2d1f3f] bg-gray-50 dark:bg-[#0f0f14] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-[#8b7a9f] focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
               />
             </div>
 
@@ -58,12 +58,12 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Contraseña"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#333333] bg-gray-50 dark:bg-[#0f0f0f] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-[#666666] focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all pr-12 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2d1f3f] bg-gray-50 dark:bg-[#0f0f14] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-[#8b7a9f] focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all pr-12 text-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#888888] hover:text-gray-600 dark:hover:text-[#aaaaaa] transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#9d8fb3] hover:text-gray-600 dark:hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
