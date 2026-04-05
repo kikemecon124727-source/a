@@ -424,6 +424,7 @@ const AdminPanel = () => {
                 {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
               <button
+                type="button"
                 onClick={closeModal}
                 className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-[#1a1a2e] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
               >
