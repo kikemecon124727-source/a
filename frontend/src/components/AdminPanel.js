@@ -42,6 +42,15 @@ const AdminPanel = () => {
 
   const filteredProducts = searchTerm ? searchProducts(searchTerm) : products;
 
+  // Get image URL - supports both base64 and URL formats
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    if (image.url) return image.url;
+    if (image.data) return image.data;
+    if (typeof image === 'string') return image;
+    return null;
+  };
+
   const handleLogout = async () => {
     await logout();
   };
@@ -58,7 +67,7 @@ const AdminPanel = () => {
 
   const openEditModal = (product) => {
     setEditingProduct(product);
-    // Normalizar colores - convertir objetos a formato estándar
+    // Normalizar colores
     const normalizedColors = (product.colores || []).map(color => {
       if (typeof color === 'string') {
         return { nombre: color, hex: getColorValue(color) || '#808080' };
@@ -134,12 +143,12 @@ const AdminPanel = () => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const markExistingImageForDeletion = (imagePath) => {
-    setImagesToDelete(prev => [...prev, imagePath]);
+  const markExistingImageForDeletion = (imageIndex) => {
+    setImagesToDelete(prev => [...prev, imageIndex]);
   };
 
-  const unmarkImageForDeletion = (imagePath) => {
-    setImagesToDelete(prev => prev.filter(p => p !== imagePath));
+  const unmarkImageForDeletion = (imageIndex) => {
+    setImagesToDelete(prev => prev.filter(i => i !== imageIndex));
   };
 
   // Detect color using AI
@@ -154,7 +163,6 @@ const AdminPanel = () => {
       
       const { color_name, hex_code } = response.data;
       
-      // Check if color already exists
       const exists = formData.colores.some(
         c => c.nombre.toLowerCase() === color_name.toLowerCase()
       );
@@ -168,14 +176,14 @@ const AdminPanel = () => {
       setColorInput('');
     } catch (error) {
       console.error('Error detecting color:', error);
-      // Fallback: add as plain text
+      // Fallback
       const exists = formData.colores.some(
         c => c.nombre.toLowerCase() === colorInput.toLowerCase()
       );
       if (!exists) {
         setFormData(prev => ({
           ...prev,
-          colores: [...prev.colores, { nombre: colorInput, hex: '#808080' }]
+          colores: [...prev.colores, { nombre: colorInput, hex: getColorValue(colorInput) || '#808080' }]
         }));
       }
       setColorInput('');
@@ -215,18 +223,20 @@ const AdminPanel = () => {
     setIsSubmitting(true);
 
     try {
-      // Convert colors to the format expected by Firebase
       const coloresForFirebase = formData.colores.map(c => ({
         nombre: c.nombre,
         hex: c.hex
       }));
 
+      // Filtrar imágenes existentes que no se eliminaron
+      const remainingExistingImages = existingImages.filter((_, idx) => !imagesToDelete.includes(idx));
+
       if (editingProduct) {
         await updateProduct(
           editingProduct.id,
-          { ...formData, colores: coloresForFirebase, imagenes: existingImages },
+          { ...formData, colores: coloresForFirebase, imagenes: remainingExistingImages },
           newImages,
-          imagesToDelete
+          [] // Ya filtramos las imágenes arriba
         );
       } else {
         await createProduct({ ...formData, colores: coloresForFirebase }, newImages);
@@ -241,8 +251,7 @@ const AdminPanel = () => {
   };
 
   const handleDelete = async (product) => {
-    const imagePaths = product.imagenes?.map(img => img.path) || [];
-    await deleteProduct(product.id, imagePaths);
+    await deleteProduct(product.id);
     setDeleteConfirm(null);
   };
 
@@ -255,7 +264,7 @@ const AdminPanel = () => {
     return (
       <span
         key={colorName}
-        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 transition-all duration-200 hover:scale-105 group"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 transition-all duration-200 hover:scale-105 group"
       >
         {colorHex && (
           <span
@@ -282,11 +291,11 @@ const AdminPanel = () => {
       <ThemeToggle />
 
       {/* Header */}
-      <header className="bg-white/80 dark:bg-[#1a1a2e]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50 transition-colors duration-300">
+      <header className="bg-white/90 dark:bg-[#1a1a2e]/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="animate-fadeIn">
-              <h1 className="text-2xl font-light tracking-wider text-gray-800 dark:text-white" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
+              <h1 className="text-2xl sm:text-3xl font-light tracking-wider text-gray-800 dark:text-white" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
                 jessicaalesuarez
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Panel de Administración</p>
@@ -319,7 +328,7 @@ const AdminPanel = () => {
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-[#252542] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all duration-300 hover:shadow-md"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-[#252542] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all duration-300"
             />
           </div>
           <button
@@ -355,13 +364,9 @@ const AdminPanel = () => {
                 <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-[#1a1a2e] relative">
                   {product.imagenes && product.imagenes.length > 0 ? (
                     <img
-                      src={product.imagenes[0].url}
+                      src={getImageUrl(product.imagenes[0])}
                       alt={product.nombre}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
-                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
@@ -385,7 +390,6 @@ const AdminPanel = () => {
                     </button>
                   </div>
 
-                  {/* Image Count Badge */}
                   {product.imagenes && product.imagenes.length > 1 && (
                     <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 rounded-full text-white text-xs">
                       {product.imagenes.length} fotos
@@ -400,7 +404,7 @@ const AdminPanel = () => {
                   </h3>
                   
                   {product.colores && product.colores.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1.5">
                       {product.colores.map(color => renderColorBadge(color))}
                     </div>
                   )}
@@ -429,7 +433,7 @@ const AdminPanel = () => {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Nombre */}
-              <div className="animate-slideUp">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Nombre del producto *
                 </label>
@@ -443,8 +447,8 @@ const AdminPanel = () => {
                 />
               </div>
 
-              {/* Descripción (Opcional) */}
-              <div className="animate-slideUp" style={{ animationDelay: '50ms' }}>
+              {/* Descripción */}
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Descripción <span className="text-gray-400">(opcional)</span>
                 </label>
@@ -458,7 +462,7 @@ const AdminPanel = () => {
               </div>
 
               {/* Colores con IA */}
-              <div className="animate-slideUp" style={{ animationDelay: '100ms' }}>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Colores disponibles
                   <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#C9A96E]">
@@ -489,7 +493,6 @@ const AdminPanel = () => {
                   </button>
                 </div>
 
-                {/* Selected Colors */}
                 {formData.colores.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
                     {formData.colores.map((color) => renderColorBadge(color, true))}
@@ -498,41 +501,38 @@ const AdminPanel = () => {
               </div>
 
               {/* Imágenes */}
-              <div className="animate-slideUp" style={{ animationDelay: '150ms' }}>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Imágenes * <span className="text-gray-400">(máx. {MAX_IMAGES})</span>
                 </label>
 
                 {/* Existing Images */}
                 {existingImages.length > 0 && (
-                  <div className="grid grid-cols-4 gap-3 mb-4">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mb-4">
                     {existingImages.map((image, idx) => (
                       <div
-                        key={image.path}
+                        key={idx}
                         className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
-                          imagesToDelete.includes(image.path)
+                          imagesToDelete.includes(idx)
                             ? 'border-red-500 opacity-50'
                             : 'border-gray-200 dark:border-gray-600'
                         }`}
                       >
                         <img
-                          src={image.url}
+                          src={getImageUrl(image)}
                           alt={`Imagen ${idx + 1}`}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
                         />
                         <button
                           type="button"
                           onClick={() => 
-                            imagesToDelete.includes(image.path)
-                              ? unmarkImageForDeletion(image.path)
-                              : markExistingImageForDeletion(image.path)
+                            imagesToDelete.includes(idx)
+                              ? unmarkImageForDeletion(idx)
+                              : markExistingImageForDeletion(idx)
                           }
                           className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
                         >
-                          {imagesToDelete.includes(image.path) ? (
+                          {imagesToDelete.includes(idx) ? (
                             <Check className="w-4 h-4" />
                           ) : (
                             <X className="w-4 h-4" />
@@ -545,7 +545,7 @@ const AdminPanel = () => {
 
                 {/* New Image Previews */}
                 {imagePreviews.length > 0 && (
-                  <div className="grid grid-cols-4 gap-3 mb-4">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mb-4">
                     {imagePreviews.map((preview, idx) => (
                       <div
                         key={preview.id}
@@ -600,13 +600,13 @@ const AdminPanel = () => {
                       disabled={isCompressing}
                       className="hidden"
                     />
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-[#C9A96E] transition-all duration-300 hover:bg-gray-50 dark:hover:bg-[#1a1a2e]/50 group">
-                      <Upload className="w-10 h-10 text-gray-400 mx-auto mb-2 group-hover:text-[#C9A96E] transition-colors duration-200" />
-                      <p className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-[#C9A96E] transition-all duration-300 hover:bg-gray-50 dark:hover:bg-[#1a1a2e]/50 group">
+                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2 group-hover:text-[#C9A96E] transition-colors duration-200" />
+                      <p className="text-gray-500 dark:text-gray-400 text-sm group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
                         Haz clic o arrastra imágenes aquí
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
-                        Se convertirán automáticamente a WebP
+                        Se guardan directamente en Firestore (sin Storage)
                       </p>
                     </div>
                   </label>

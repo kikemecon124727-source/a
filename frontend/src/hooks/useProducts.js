@@ -1,23 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { db, storage } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { 
   collection, 
   addDoc, 
   updateDoc, 
   deleteDoc, 
   doc, 
-  getDocs,
   onSnapshot,
   query,
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject 
-} from 'firebase/storage';
 import { compressAndConvertToWebP } from '../lib/imageCompressor';
 
 const PRODUCTS_COLLECTION = 'productos';
@@ -50,34 +43,36 @@ export const useProducts = () => {
     return () => unsubscribe();
   }, []);
 
-  // Subir imagen a Firebase Storage
-  const uploadImage = async (file, productId) => {
-    try {
-      // Comprimir y convertir a WebP
-      const compressedFile = await compressAndConvertToWebP(file);
-      
-      const timestamp = Date.now();
-      const fileName = `${productId}_${timestamp}.webp`;
-      const storageRef = ref(storage, `productos/${productId}/${fileName}`);
-      
-      await uploadBytes(storageRef, compressedFile);
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      return { url: downloadURL, path: `productos/${productId}/${fileName}` };
-    } catch (err) {
-      console.error('Error uploading image:', err);
-      throw err;
-    }
+  // Convertir imagen a base64
+  const imageToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
   };
 
-  // Eliminar imagen de Firebase Storage
-  const deleteImage = async (imagePath) => {
+  // Procesar imagen: comprimir y convertir a base64
+  const processImage = async (file) => {
     try {
-      const imageRef = ref(storage, imagePath);
-      await deleteObject(imageRef);
+      // Comprimir y convertir a WebP
+      const compressedFile = await compressAndConvertToWebP(file, {
+        maxSizeMB: 0.3, // Máximo 300KB para guardar en Firestore
+        maxWidthOrHeight: 800,
+      });
+      
+      // Convertir a base64
+      const base64 = await imageToBase64(compressedFile);
+      
+      return {
+        data: base64,
+        name: compressedFile.name,
+        size: compressedFile.size
+      };
     } catch (err) {
-      console.error('Error deleting image:', err);
-      // No lanzar error si la imagen no existe
+      console.error('Error processing image:', err);
+      throw err;
     }
   };
 
@@ -86,26 +81,21 @@ export const useProducts = () => {
     try {
       setLoading(true);
       
-      // Crear documento primero para obtener ID
+      // Procesar imágenes a base64
+      const processedImages = [];
+      for (const file of imageFiles) {
+        const imageData = await processImage(file);
+        processedImages.push(imageData);
+      }
+
+      // Crear documento
       const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), {
         nombre: productData.nombre,
         descripcion: productData.descripcion || '',
         colores: productData.colores || [],
-        imagenes: [],
+        imagenes: processedImages,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-      });
-
-      // Subir imágenes
-      const uploadedImages = [];
-      for (const file of imageFiles) {
-        const imageData = await uploadImage(file, docRef.id);
-        uploadedImages.push(imageData);
-      }
-
-      // Actualizar documento con las URLs de las imágenes
-      await updateDoc(doc(db, PRODUCTS_COLLECTION, docRef.id), {
-        imagenes: uploadedImages
       });
 
       setLoading(false);
@@ -123,29 +113,34 @@ export const useProducts = () => {
     try {
       setLoading(true);
 
-      // Eliminar imágenes marcadas para borrar
-      for (const imagePath of imagesToDelete) {
-        await deleteImage(imagePath);
-      }
-
-      // Subir nuevas imágenes
-      const newUploadedImages = [];
+      // Procesar nuevas imágenes
+      const newProcessedImages = [];
       for (const file of newImageFiles) {
-        const imageData = await uploadImage(file, productId);
-        newUploadedImages.push(imageData);
+        const imageData = await processImage(file);
+        newProcessedImages.push(imageData);
       }
 
       // Filtrar imágenes existentes (quitar las eliminadas)
-      const existingImages = productData.imagenes.filter(
-        img => !imagesToDelete.includes(img.path)
-      );
+      // Las imágenes a eliminar vienen como índices o nombres
+      let existingImages = productData.imagenes || [];
+      if (imagesToDelete.length > 0) {
+        existingImages = existingImages.filter((img, idx) => {
+          // Si imagesToDelete contiene índices numéricos
+          if (typeof imagesToDelete[0] === 'number') {
+            return !imagesToDelete.includes(idx);
+          }
+          // Si contiene nombres o paths
+          const imgName = img.name || img.path || `img_${idx}`;
+          return !imagesToDelete.includes(imgName);
+        });
+      }
 
       // Actualizar documento
       await updateDoc(doc(db, PRODUCTS_COLLECTION, productId), {
         nombre: productData.nombre,
         descripcion: productData.descripcion || '',
         colores: productData.colores || [],
-        imagenes: [...existingImages, ...newUploadedImages],
+        imagenes: [...existingImages, ...newProcessedImages],
         updatedAt: serverTimestamp()
       });
 
@@ -160,16 +155,11 @@ export const useProducts = () => {
   };
 
   // Eliminar producto
-  const deleteProduct = async (productId, imagePaths = []) => {
+  const deleteProduct = async (productId) => {
     try {
       setLoading(true);
 
-      // Eliminar todas las imágenes del producto
-      for (const imagePath of imagePaths) {
-        await deleteImage(imagePath);
-      }
-
-      // Eliminar documento
+      // Eliminar documento (las imágenes se eliminan con el documento ya que están en base64)
       await deleteDoc(doc(db, PRODUCTS_COLLECTION, productId));
 
       setLoading(false);
@@ -189,9 +179,10 @@ export const useProducts = () => {
 
     return products.filter(product => {
       const matchName = product.nombre?.toLowerCase().includes(term);
-      const matchColors = product.colores?.some(color => 
-        color.toLowerCase().includes(term)
-      );
+      const matchColors = product.colores?.some(color => {
+        const colorName = typeof color === 'string' ? color : (color?.nombre || '');
+        return colorName.toLowerCase().includes(term);
+      });
       const matchDesc = product.descripcion?.toLowerCase().includes(term);
       return matchName || matchColors || matchDesc;
     });
