@@ -1,14 +1,16 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { ThemeToggle } from './ThemeToggle';
 import { compressMultipleImages, createImagePreview, revokeImagePreview } from '../lib/imageCompressor';
-import { searchColors, getColorValue } from '../lib/colorDictionary';
+import { getColorValue } from '../lib/colorDictionary';
+import axios from 'axios';
 import { 
   LogOut, Plus, Trash2, Edit2, X, Upload, Search,
-  Image as ImageIcon, Loader2, Check, AlertCircle
+  Image as ImageIcon, Loader2, Check, AlertCircle, Sparkles
 } from 'lucide-react';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const MAX_IMAGES = 10;
 
 const AdminPanel = () => {
@@ -36,7 +38,7 @@ const AdminPanel = () => {
   
   // Color input
   const [colorInput, setColorInput] = useState('');
-  const [colorSuggestions, setColorSuggestions] = useState([]);
+  const [isDetectingColor, setIsDetectingColor] = useState(false);
 
   const filteredProducts = searchTerm ? searchProducts(searchTerm) : products;
 
@@ -56,10 +58,21 @@ const AdminPanel = () => {
 
   const openEditModal = (product) => {
     setEditingProduct(product);
+    // Normalizar colores - convertir objetos a formato estándar
+    const normalizedColors = (product.colores || []).map(color => {
+      if (typeof color === 'string') {
+        return { nombre: color, hex: getColorValue(color) || '#808080' };
+      }
+      return {
+        nombre: color.nombre || color.name || '',
+        hex: color.hex || color.color || '#808080'
+      };
+    }).filter(c => c.nombre);
+    
     setFormData({
       nombre: product.nombre || '',
       descripcion: product.descripcion || '',
-      colores: product.colores || [],
+      colores: normalizedColors,
     });
     setExistingImages(product.imagenes || []);
     setNewImages([]);
@@ -69,7 +82,6 @@ const AdminPanel = () => {
   };
 
   const closeModal = () => {
-    // Cleanup previews
     imagePreviews.forEach(preview => revokeImagePreview(preview.url));
     setIsModalOpen(false);
     setEditingProduct(null);
@@ -79,7 +91,6 @@ const AdminPanel = () => {
     setExistingImages([]);
     setImagesToDelete([]);
     setColorInput('');
-    setColorSuggestions([]);
   };
 
   const handleImageSelect = async (e) => {
@@ -131,33 +142,59 @@ const AdminPanel = () => {
     setImagesToDelete(prev => prev.filter(p => p !== imagePath));
   };
 
-  const handleColorInputChange = (e) => {
-    const value = e.target.value;
-    setColorInput(value);
+  // Detect color using AI
+  const detectColor = async () => {
+    if (!colorInput.trim()) return;
     
-    if (value.trim()) {
-      const suggestions = searchColors(value).slice(0, 8);
-      setColorSuggestions(suggestions);
-    } else {
-      setColorSuggestions([]);
+    setIsDetectingColor(true);
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/detect-color`, {
+        text: colorInput.trim()
+      });
+      
+      const { color_name, hex_code } = response.data;
+      
+      // Check if color already exists
+      const exists = formData.colores.some(
+        c => c.nombre.toLowerCase() === color_name.toLowerCase()
+      );
+      
+      if (!exists) {
+        setFormData(prev => ({
+          ...prev,
+          colores: [...prev.colores, { nombre: color_name, hex: hex_code }]
+        }));
+      }
+      setColorInput('');
+    } catch (error) {
+      console.error('Error detecting color:', error);
+      // Fallback: add as plain text
+      const exists = formData.colores.some(
+        c => c.nombre.toLowerCase() === colorInput.toLowerCase()
+      );
+      if (!exists) {
+        setFormData(prev => ({
+          ...prev,
+          colores: [...prev.colores, { nombre: colorInput, hex: '#808080' }]
+        }));
+      }
+      setColorInput('');
+    } finally {
+      setIsDetectingColor(false);
     }
   };
 
-  const addColor = (colorName) => {
-    if (colorName && !formData.colores.includes(colorName.toLowerCase())) {
-      setFormData(prev => ({
-        ...prev,
-        colores: [...prev.colores, colorName.toLowerCase()]
-      }));
+  const handleColorKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      detectColor();
     }
-    setColorInput('');
-    setColorSuggestions([]);
   };
 
   const removeColor = (colorName) => {
     setFormData(prev => ({
       ...prev,
-      colores: prev.colores.filter(c => c !== colorName)
+      colores: prev.colores.filter(c => c.nombre !== colorName)
     }));
   };
 
@@ -178,15 +215,21 @@ const AdminPanel = () => {
     setIsSubmitting(true);
 
     try {
+      // Convert colors to the format expected by Firebase
+      const coloresForFirebase = formData.colores.map(c => ({
+        nombre: c.nombre,
+        hex: c.hex
+      }));
+
       if (editingProduct) {
         await updateProduct(
           editingProduct.id,
-          { ...formData, imagenes: existingImages },
+          { ...formData, colores: coloresForFirebase, imagenes: existingImages },
           newImages,
           imagesToDelete
         );
       } else {
-        await createProduct(formData, newImages);
+        await createProduct({ ...formData, colores: coloresForFirebase }, newImages);
       }
       closeModal();
     } catch (error) {
@@ -204,7 +247,6 @@ const AdminPanel = () => {
   };
 
   const renderColorBadge = (color, removable = false) => {
-    // Handle both string colors and object colors {nombre, hex}
     const colorName = typeof color === 'string' ? color : (color?.nombre || color?.name || '');
     const colorHex = typeof color === 'string' ? getColorValue(color) : (color?.hex || color?.color || getColorValue(colorName));
     
@@ -213,11 +255,11 @@ const AdminPanel = () => {
     return (
       <span
         key={colorName}
-        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 transition-all duration-200 hover:scale-105 group"
       >
         {colorHex && (
           <span
-            className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600"
+            className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-500 shadow-sm"
             style={{ background: colorHex }}
           />
         )}
@@ -226,7 +268,7 @@ const AdminPanel = () => {
           <button
             type="button"
             onClick={() => removeColor(colorName)}
-            className="ml-1 text-gray-400 hover:text-red-500"
+            className="ml-1 text-gray-400 hover:text-red-500 transition-colors duration-200 hover:scale-125"
           >
             <X className="w-3 h-3" />
           </button>
@@ -236,27 +278,27 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-[#EDE6DB] to-[#E5DED3] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-[#EDE6DB] to-[#E5DED3] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f0f23]">
       <ThemeToggle />
 
       {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white/80 dark:bg-[#1a1a2e]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="animate-fadeIn">
               <h1 className="text-2xl font-light tracking-wider text-gray-800 dark:text-white" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
                 jessicaalesuarez
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Panel de Administración</p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 animate-fadeIn">
               <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">
                 {user?.email}
               </span>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="hidden sm:inline">Cerrar sesión</span>
@@ -269,20 +311,20 @@ const AdminPanel = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-8 animate-slideUp">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E]"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-[#252542] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all duration-300 hover:shadow-md"
             />
           </div>
           <button
             onClick={openCreateModal}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#C9A96E] hover:bg-[#B8986A] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#C9A96E] hover:bg-[#B8986A] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-5 h-5" />
             Nuevo Producto
@@ -295,7 +337,7 @@ const AdminPanel = () => {
             <div className="w-12 h-12 border-4 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20 animate-fadeIn">
             <ImageIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-lg">
               {searchTerm ? 'No se encontraron productos' : 'No hay productos. ¡Crea el primero!'}
@@ -303,36 +345,41 @@ const AdminPanel = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product, index) => (
               <div
                 key={product.id}
-                className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                className="group bg-white dark:bg-[#252542] rounded-2xl overflow-hidden shadow-md hover:shadow-xl dark:shadow-gray-900/30 transition-all duration-300 animate-fadeIn"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Product Image */}
-                <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 relative">
+                <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-[#1a1a2e] relative">
                   {product.imagenes && product.imagenes.length > 0 ? (
                     <img
                       src={product.imagenes[0].url}
                       alt={product.nombre}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+                      }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
                       <ImageIcon className="w-12 h-12" />
                     </div>
                   )}
 
                   {/* Action Buttons */}
-                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                     <button
                       onClick={() => openEditModal(product)}
-                      className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="w-10 h-10 bg-white dark:bg-[#252542] rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-[#1a1a2e] transition-all duration-200 hover:scale-110 active:scale-95"
                     >
                       <Edit2 className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(product)}
-                      className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                      className="w-10 h-10 bg-white dark:bg-[#252542] rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 hover:scale-110 active:scale-95"
                     >
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </button>
@@ -354,10 +401,7 @@ const AdminPanel = () => {
                   
                   {product.colores && product.colores.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {product.colores.slice(0, 3).map(color => renderColorBadge(color))}
-                      {product.colores.length > 3 && (
-                        <span className="text-xs text-gray-400">+{product.colores.length - 3}</span>
-                      )}
+                      {product.colores.map(color => renderColorBadge(color))}
                     </div>
                   )}
                 </div>
@@ -369,23 +413,23 @@ const AdminPanel = () => {
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-[#252542] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl dark:shadow-gray-900/50 animate-slideIn">
+            <div className="sticky top-0 bg-white dark:bg-[#252542] border-b border-gray-200 dark:border-gray-700/50 px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
                 {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
               <button
                 onClick={closeModal}
-                className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-[#1a1a2e] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Nombre */}
-              <div>
+              <div className="animate-slideUp">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Nombre del producto *
                 </label>
@@ -395,12 +439,12 @@ const AdminPanel = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
                   placeholder="Ej: Vestido Floral"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E]"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#1a1a2e] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all duration-200"
                 />
               </div>
 
               {/* Descripción (Opcional) */}
-              <div>
+              <div className="animate-slideUp" style={{ animationDelay: '50ms' }}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Descripción <span className="text-gray-400">(opcional)</span>
                 </label>
@@ -409,54 +453,40 @@ const AdminPanel = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
                   placeholder="Describe el producto..."
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#1a1a2e] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all duration-200 resize-none"
                 />
               </div>
 
-              {/* Colores */}
-              <div>
+              {/* Colores con IA */}
+              <div className="animate-slideUp" style={{ animationDelay: '100ms' }}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Colores disponibles
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#C9A96E]">
+                    <Sparkles className="w-3 h-3" /> IA detecta colores
+                  </span>
                 </label>
                 
-                <div className="relative">
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={colorInput}
-                    onChange={handleColorInputChange}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (colorSuggestions.length > 0) {
-                          addColor(colorSuggestions[0]);
-                        } else if (colorInput.trim()) {
-                          addColor(colorInput.trim());
-                        }
-                      }
-                    }}
-                    placeholder="Escribe un color..."
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E]"
+                    onChange={(e) => setColorInput(e.target.value)}
+                    onKeyDown={handleColorKeyDown}
+                    placeholder="Escribe un color (ej: madera, cielo, neón rosa...)"
+                    className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#1a1a2e] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all duration-200"
                   />
-                  
-                  {/* Color Suggestions */}
-                  {colorSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
-                      {colorSuggestions.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => addColor(color)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-300"
-                        >
-                          <span
-                            className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
-                            style={{ background: getColorValue(color) }}
-                          />
-                          {color}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={detectColor}
+                    disabled={isDetectingColor || !colorInput.trim()}
+                    className="px-4 py-3 bg-[#C9A96E] hover:bg-[#B8986A] text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                  >
+                    {isDetectingColor ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
 
                 {/* Selected Colors */}
@@ -468,7 +498,7 @@ const AdminPanel = () => {
               </div>
 
               {/* Imágenes */}
-              <div>
+              <div className="animate-slideUp" style={{ animationDelay: '150ms' }}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Imágenes * <span className="text-gray-400">(máx. {MAX_IMAGES})</span>
                 </label>
@@ -479,16 +509,19 @@ const AdminPanel = () => {
                     {existingImages.map((image, idx) => (
                       <div
                         key={image.path}
-                        className={`relative aspect-square rounded-xl overflow-hidden border-2 ${
+                        className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
                           imagesToDelete.includes(image.path)
                             ? 'border-red-500 opacity-50'
-                            : 'border-gray-200 dark:border-gray-700'
+                            : 'border-gray-200 dark:border-gray-600'
                         }`}
                       >
                         <img
                           src={image.url}
                           alt={`Imagen ${idx + 1}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
                         />
                         <button
                           type="button"
@@ -497,7 +530,7 @@ const AdminPanel = () => {
                               ? unmarkImageForDeletion(image.path)
                               : markExistingImageForDeletion(image.path)
                           }
-                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
                         >
                           {imagesToDelete.includes(image.path) ? (
                             <Check className="w-4 h-4" />
@@ -516,7 +549,7 @@ const AdminPanel = () => {
                     {imagePreviews.map((preview, idx) => (
                       <div
                         key={preview.id}
-                        className="relative aspect-square rounded-xl overflow-hidden border-2 border-green-500"
+                        className="relative aspect-square rounded-xl overflow-hidden border-2 border-green-500 animate-fadeIn"
                       >
                         <img
                           src={preview.url}
@@ -526,7 +559,7 @@ const AdminPanel = () => {
                         <button
                           type="button"
                           onClick={() => removeNewImage(idx)}
-                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -540,7 +573,7 @@ const AdminPanel = () => {
 
                 {/* Compression Progress */}
                 {isCompressing && (
-                  <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+                  <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl animate-fadeIn">
                     <div className="flex items-center gap-3 mb-2">
                       <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
                       <span className="text-sm text-blue-600 dark:text-blue-400">
@@ -567,9 +600,9 @@ const AdminPanel = () => {
                       disabled={isCompressing}
                       className="hidden"
                     />
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-[#C9A96E] transition-colors">
-                      <Upload className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 dark:text-gray-400">
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-[#C9A96E] transition-all duration-300 hover:bg-gray-50 dark:hover:bg-[#1a1a2e]/50 group">
+                      <Upload className="w-10 h-10 text-gray-400 mx-auto mb-2 group-hover:text-[#C9A96E] transition-colors duration-200" />
+                      <p className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
                         Haz clic o arrastra imágenes aquí
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
@@ -588,7 +621,7 @@ const AdminPanel = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || isCompressing}
-                className="w-full py-3 px-4 bg-[#C9A96E] hover:bg-[#B8986A] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-[#C9A96E] hover:bg-[#B8986A] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]"
               >
                 {isSubmitting ? (
                   <>
@@ -609,8 +642,8 @@ const AdminPanel = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-[#252542] rounded-2xl w-full max-w-md p-6 shadow-2xl dark:shadow-gray-900/50 animate-slideIn">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-red-500" />
@@ -630,13 +663,13 @@ const AdminPanel = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1a1a2e] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors"
+                className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Eliminar
               </button>
