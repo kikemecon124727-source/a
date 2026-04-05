@@ -19,7 +19,6 @@ const Catalogo = () => {
     setFilteredProducts(products);
   }, [products]);
 
-  // Search in real-time for the overlay
   useEffect(() => {
     if (searchTerm.trim()) {
       const results = searchProducts(searchTerm);
@@ -89,39 +88,46 @@ const Catalogo = () => {
     productsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const renderColorBadge = (color) => {
+  // Color badge - show ALL colors, no truncation
+  const renderColorBadge = (color, size = 'normal') => {
     let colorName = typeof color === 'string' ? color : (color?.nombre || color?.name || '');
     colorName = colorName.replace(/\s*\d+$/, '').trim();
     const colorHex = typeof color === 'string' ? getColorValue(colorName) : (color?.hex || color?.color || getColorValue(colorName));
     
     if (!colorName) return null;
+
+    const sizeClasses = size === 'small' 
+      ? 'px-2 py-0.5 text-[10px] gap-1'
+      : 'px-2.5 py-1 text-xs gap-1.5';
+
+    const dotSize = size === 'small' ? 'w-3.5 h-3.5' : 'w-4 h-4';
     
     return (
       <span
         key={colorName}
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300"
+        className={`inline-flex items-center ${sizeClasses} rounded-full font-medium bg-white/80 dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200/50 dark:border-gray-500`}
       >
         {colorHex && (
           <span
-            className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full border border-gray-200 dark:border-gray-500 flex-shrink-0"
+            className={`${dotSize} rounded-full border border-gray-300 dark:border-gray-400 flex-shrink-0 shadow-sm`}
             style={{ background: colorHex }}
           />
         )}
-        <span className="truncate max-w-[50px] sm:max-w-[70px]">{colorName}</span>
+        <span>{colorName}</span>
       </span>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a]">
+    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       
       {/* Elegant Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0f172a]/98 backdrop-blur-md border-b border-gray-100 dark:border-gray-800/50">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <h1 
-              className="text-base sm:text-lg md:text-xl font-light tracking-[0.15em] text-gray-800 dark:text-white uppercase"
+              className="text-sm sm:text-base md:text-lg font-light tracking-[0.2em] text-gray-800 dark:text-white uppercase"
               style={{ fontFamily: 'Georgia, serif' }}
             >
               <span className="hidden sm:inline">JESSICAALESUAREZ</span>
@@ -129,11 +135,10 @@ const Catalogo = () => {
             </h1>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Search Button */}
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={openSearch}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors"
+                className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                 aria-label="Buscar"
               >
                 <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -147,87 +152,84 @@ const Catalogo = () => {
 
       {/* Elegant Search Overlay */}
       {isSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-white dark:bg-[#0f172a] animate-fadeIn">
-          <div className="max-w-4xl mx-auto px-4 py-6">
-            {/* Search Header */}
-            <div className="flex items-center gap-4 border-b border-gray-200 dark:border-gray-700 pb-4">
-              <Search className="w-5 h-5 text-gray-400" />
+        <div className="fixed inset-0 z-50 bg-white dark:bg-[#1a1625] animate-fadeIn">
+          {/* Search Header */}
+          <div className="border-b border-gray-100 dark:border-white/10">
+            <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+              <Search className="w-5 h-5 text-gray-400 dark:text-white/50" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="¿Qué estás buscando?"
-                className="flex-1 text-lg sm:text-xl bg-transparent text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none"
+                className="flex-1 text-lg sm:text-xl bg-transparent text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none"
                 autoFocus
               />
               <button
                 onClick={closeSearch}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-white/60" />
               </button>
             </div>
+          </div>
 
-            {/* Search Results */}
-            <div className="mt-6 max-h-[70vh] overflow-y-auto">
-              {searchTerm.trim() === '' ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-400 dark:text-gray-500 text-sm">
-                    Escribe para buscar productos por nombre o color
-                  </p>
-                </div>
-              ) : searchResults.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No se encontraron productos para "{searchTerm}"
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-4 uppercase tracking-wide">
-                    {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''}
-                  </p>
-                  {searchResults.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => handleSearchSelect(product)}
-                      className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left group"
-                    >
-                      {/* Product Thumbnail */}
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-                        {product.imagenes && product.imagenes.length > 0 ? (
-                          <img
-                            src={getImageUrl(product.imagenes[0])}
-                            alt={product.nombre}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                            Sin imagen
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-800 dark:text-white truncate group-hover:text-[#C9A96E] transition-colors">
-                          {product.nombre}
-                        </h4>
-                        {product.colores && product.colores.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {product.colores.slice(0, 3).map(renderColorBadge)}
-                          </div>
-                        )}
-                      </div>
+          {/* Search Results */}
+          <div className="max-w-4xl mx-auto px-4 py-6 max-h-[calc(100vh-80px)] overflow-y-auto">
+            {searchTerm.trim() === '' ? (
+              <div className="text-center py-16">
+                <p className="text-gray-400 dark:text-gray-500 text-sm">
+                  Escribe para buscar productos por nombre o color
+                </p>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No se encontraron productos para "{searchTerm}"
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4 uppercase tracking-wider">
+                  {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''}
+                </p>
+                {searchResults.map((product) => (
+                  <button
+                    key={product.id}
+                    onClick={() => handleSearchSelect(product)}
+                    className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors text-left group"
+                  >
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                      {product.imagenes && product.imagenes.length > 0 ? (
+                        <img
+                          src={getImageUrl(product.imagenes[0])}
+                          alt={product.nombre}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs">
+                          Sin imagen
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-800 dark:text-white truncate group-hover:text-[#C9A96E] transition-colors">
+                        {product.nombre}
+                      </h4>
+                      {product.colores && product.colores.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {product.colores.map(c => renderColorBadge(c, 'small'))}
+                        </div>
+                      )}
+                    </div>
 
-                      {/* Arrow */}
-                      <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -243,7 +245,6 @@ const Catalogo = () => {
             Descubre nuestro catálogo
           </p>
           
-          {/* Scroll Down Button */}
           <button
             onClick={scrollToProducts}
             className="mt-6 sm:mt-8 group"
@@ -257,7 +258,7 @@ const Catalogo = () => {
       </section>
 
       {/* Products Section */}
-      <section ref={productsRef} className="py-16 sm:py-24 px-4 sm:px-6">
+      <section ref={productsRef} className="py-16 sm:py-24 px-4 sm:px-6 bg-[#F8F6F3] dark:bg-gray-800">
         <div className="max-w-7xl mx-auto">
           {/* Section Title */}
           <div className="text-center mb-12 sm:mb-16">
@@ -267,7 +268,7 @@ const Catalogo = () => {
             <div className="w-16 sm:w-24 h-[1px] bg-[#C9A96E] mx-auto"></div>
           </div>
 
-          {/* Products Grid - Elegant Responsive */}
+          {/* Products Grid */}
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-8 border-2 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
@@ -279,7 +280,7 @@ const Catalogo = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {filteredProducts.map((product, index) => (
                 <div
                   key={product.id}
@@ -287,35 +288,36 @@ const Catalogo = () => {
                   className="group cursor-pointer animate-fadeIn"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {/* Product Image */}
-                  <div className="aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-[#1e293b] rounded-lg sm:rounded-xl mb-3 sm:mb-4">
-                    {product.imagenes && product.imagenes.length > 0 ? (
-                      <img
-                        src={getImageUrl(product.imagenes[0])}
-                        alt={product.nombre}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600 text-xs sm:text-sm">
-                        Sin imagen
-                      </div>
-                    )}
-                  </div>
+                  {/* Product Card with white background */}
+                  <div className="bg-white dark:bg-gray-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg dark:shadow-black/20 transition-all duration-300">
+                    {/* Product Image */}
+                    <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-gray-800">
+                      {product.imagenes && product.imagenes.length > 0 ? (
+                        <img
+                          src={getImageUrl(product.imagenes[0])}
+                          alt={product.nombre}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs sm:text-sm">
+                          Sin imagen
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Product Info */}
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white truncate group-hover:text-[#C9A96E] transition-colors duration-300">
-                      {product.nombre}
-                    </h4>
-                    
-                    {product.colores && product.colores.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {product.colores.slice(0, 2).map(renderColorBadge)}
-                        {product.colores.length > 2 && (
-                          <span className="text-[10px] text-gray-400">+{product.colores.length - 2}</span>
-                        )}
-                      </div>
-                    )}
+                    {/* Product Info */}
+                    <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
+                      <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white truncate group-hover:text-[#C9A96E] transition-colors duration-300">
+                        {product.nombre}
+                      </h4>
+                      
+                      {/* Show ALL colors */}
+                      {product.colores && product.colores.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {product.colores.map(c => renderColorBadge(c, 'small'))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -325,9 +327,9 @@ const Catalogo = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white/80 dark:bg-[#0f172a]/95 border-t border-gray-100 dark:border-gray-800/50 py-10 sm:py-12">
+      <footer className="bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 py-10 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
-          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm tracking-wide">
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm tracking-wider uppercase">
             © 2026 JESSICAALESUAREZ
           </p>
           <p className="text-gray-400 dark:text-gray-500 text-[10px] sm:text-xs italic">
@@ -344,20 +346,19 @@ const Catalogo = () => {
         >
           <div className="min-h-full flex items-start sm:items-center justify-center p-0 sm:p-4">
             <div 
-              className="bg-white dark:bg-[#1e293b] w-full sm:max-w-4xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-4xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
               <button
                 onClick={closeProductModal}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#0f172a]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-gray-900/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
               </button>
 
               <div className="flex flex-col sm:flex-row">
                 {/* Image Carousel */}
-                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[400px] bg-gray-50 dark:bg-[#0f172a]">
+                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-gray-900">
                   {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
                     <>
                       <img
@@ -370,18 +371,17 @@ const Catalogo = () => {
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#1e293b]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-gray-700/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                           >
                             <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300 rotate-90" />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#1e293b]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-gray-700/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                           >
                             <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300 -rotate-90" />
                           </button>
 
-                          {/* Image Indicators */}
                           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
                             {selectedProduct.imagenes.map((_, idx) => (
                               <button
@@ -395,38 +395,39 @@ const Catalogo = () => {
                       )}
                     </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
                       Sin imagen
                     </div>
                   )}
                 </div>
 
                 {/* Product Details */}
-                <div className="p-5 sm:p-6 sm:w-72 lg:w-80 flex flex-col">
-                  <h2 className="text-lg sm:text-xl font-medium text-gray-800 dark:text-white mb-3">
+                <div className="p-5 sm:p-6 sm:w-80 lg:w-96 flex flex-col">
+                  <h2 className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-white mb-3">
                     {selectedProduct.nombre}
                   </h2>
 
                   {selectedProduct.descripcion && (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mb-5 leading-relaxed">
                       {selectedProduct.descripcion}
                     </p>
                   )}
 
+                  {/* Show ALL colors in modal too */}
                   {selectedProduct.colores && selectedProduct.colores.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Colores</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedProduct.colores.map(renderColorBadge)}
+                    <div className="mb-5">
+                      <p className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">Colores disponibles</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProduct.colores.map(c => renderColorBadge(c))}
                       </div>
                     </div>
                   )}
 
                   <button
                     onClick={handleWhatsApp}
-                    className="mt-auto w-full py-3 bg-[#25D366] hover:bg-[#20BD5A] text-white text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                    className="mt-auto w-full py-3.5 bg-[#25D366] hover:bg-[#20BD5A] text-white text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle className="w-5 h-5" />
                     Consultar por WhatsApp
                   </button>
                 </div>
@@ -449,3 +450,4 @@ const Catalogo = () => {
 };
 
 export default Catalogo;
+

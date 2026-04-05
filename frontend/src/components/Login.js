@@ -25,15 +25,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F0E8] via-[#EDE6DB] to-[#E5DED3] dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#1a1625] dark:via-[#2d2640] dark:to-[#1a1625] p-4">
       <div className="w-full max-w-sm">
-        <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+        <div className="bg-white dark:bg-[#2d2640] rounded-2xl shadow-xl dark:shadow-black/20 p-6 sm:p-8 space-y-6 border border-gray-100 dark:border-white/5">
           {/* Logo/Title */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-light tracking-wider text-gray-800 dark:text-white" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
-              jessicaalesuarez
+            <h1 className="text-xl sm:text-2xl font-light tracking-[0.15em] text-gray-800 dark:text-white uppercase" style={{ fontFamily: 'Georgia, serif' }}>
+              JESSICAALESUAREZ
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm tracking-wide">
+            <p className="text-gray-500 dark:text-white/50 text-xs tracking-wide">
               Administración de Catálogo
             </p>
           </div>
@@ -47,7 +47,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#0f172a] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
               />
             </div>
 
@@ -58,12 +58,12 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Contraseña"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#0f172a] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all pr-12 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all pr-12 text-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/60 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>

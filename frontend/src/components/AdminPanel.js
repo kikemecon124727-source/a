@@ -301,9 +301,9 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F5F0E8] via-[#EDE6DB] to-[#E5DED3] dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#1a1625] dark:via-[#2d2640] dark:to-[#1a1625]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#0f172a]/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#1a1625]/98 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -311,17 +311,17 @@ const AdminPanel = () => {
                 <span className="hidden sm:inline">jessicaalesuarez</span>
                 <span className="sm:hidden">jessica</span>
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Panel de Administración</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 hidden sm:block">Panel de Administración</p>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs text-gray-500 dark:text-gray-400 hidden md:inline truncate max-w-[150px]">
+              <span className="text-xs text-gray-500 dark:text-white/60 hidden md:inline truncate max-w-[150px]">
                 {user?.email}
               </span>
               <ThemeToggle inline />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-all text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-gray-600 dark:text-white/80 hover:text-red-500 dark:hover:text-red-400 transition-all text-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Salir</span>
@@ -342,7 +342,7 @@ const AdminPanel = () => {
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#2d2640] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
             />
           </div>
           <button
@@ -362,7 +362,7 @@ const AdminPanel = () => {
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20">
             <ImageIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500 dark:text-white/60">
               {searchTerm ? 'No se encontraron productos' : 'No hay productos. ¡Crea el primero!'}
             </p>
           </div>
@@ -371,11 +371,11 @@ const AdminPanel = () => {
             {filteredProducts.map((product, index) => (
               <div
                 key={product.id}
-                className="group bg-white dark:bg-[#1e293b] rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl dark:shadow-gray-900/20 transition-all animate-fadeIn"
+                className="group bg-white dark:bg-[#2d2640] rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl dark:shadow-gray-900/20 transition-all animate-fadeIn"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
                 {/* Product Image */}
-                <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-[#0f172a] relative">
+                <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-[#1a1625] relative">
                   {product.imagenes && product.imagenes.length > 0 ? (
                     <img
                       src={getImageUrl(product.imagenes[0])}
@@ -392,13 +392,13 @@ const AdminPanel = () => {
                   <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                       onClick={() => openEditModal(product)}
-                      className="w-8 h-8 bg-white dark:bg-[#1e293b] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                      className="w-8 h-8 bg-white dark:bg-[#2d2640] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
                     >
-                      <Edit2 className="w-3.5 h-3.5 text-gray-600 dark:text-gray-300" />
+                      <Edit2 className="w-3.5 h-3.5 text-gray-600 dark:text-white/80" />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(product)}
-                      className="w-8 h-8 bg-white dark:bg-[#1e293b] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                      className="w-8 h-8 bg-white dark:bg-[#2d2640] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
                     >
                       <Trash2 className="w-3.5 h-3.5 text-red-500" />
                     </button>
@@ -430,10 +430,10 @@ const AdminPanel = () => {
       </main>
 
       {/* Footer - Always at bottom */}
-      <footer className="bg-white/80 dark:bg-[#0f172a]/95 border-t border-gray-200 dark:border-gray-800 py-6 mt-auto">
+      <footer className="bg-white/80 dark:bg-[#1a1625]/95 border-t border-gray-200 dark:border-white/5 py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">© 2026 jessicaalesuarez</p>
-          <p className="text-gray-500 dark:text-gray-500 text-xs italic">Gracias por su preferencia ♥</p>
+          <p className="text-gray-600 dark:text-white/60 text-sm">© 2026 jessicaalesuarez</p>
+          <p className="text-gray-500 dark:text-white/50 text-xs italic">Gracias por su preferencia ♥</p>
         </div>
       </footer>
 
@@ -441,15 +441,15 @@ const AdminPanel = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm animate-fadeIn overflow-y-auto">
           <div className="min-h-full flex items-start sm:items-center justify-center p-0 sm:p-4">
-            <div className="bg-white dark:bg-[#1e293b] w-full sm:max-w-lg sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn">
-              <div className="sticky top-0 bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between z-10">
+            <div className="bg-white dark:bg-[#2d2640] w-full sm:max-w-lg sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn">
+              <div className="sticky top-0 bg-white dark:bg-[#2d2640] border-b border-gray-200 dark:border-white/10 px-4 sm:px-6 py-4 flex items-center justify-between z-10">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                   {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
                 </h2>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#0f172a] flex items-center justify-center transition-all"
+                  className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#1a1625] flex items-center justify-center transition-all"
                 >
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
@@ -458,7 +458,7 @@ const AdminPanel = () => {
               <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
                 {/* Nombre */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
                     Nombre del producto *
                   </label>
                   <input
@@ -467,13 +467,13 @@ const AdminPanel = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
                     placeholder="Ej. Consola de videojuegos"
                     required
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#0f172a] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
                   />
                 </div>
 
                 {/* Descripción */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
                     Descripción <span className="text-gray-400">(opcional)</span>
                   </label>
                   <textarea
@@ -481,13 +481,13 @@ const AdminPanel = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
                     placeholder="Describe el producto..."
                     rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#0f172a] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm resize-none"
                   />
                 </div>
 
                 {/* Colores con IA */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
                     Colores
                     <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#C9A96E]">
                       <Sparkles className="w-3 h-3" /> IA
@@ -501,7 +501,7 @@ const AdminPanel = () => {
                       onChange={(e) => setColorInput(e.target.value)}
                       onKeyDown={handleColorKeyDown}
                       placeholder="Ej: madera, cielo, neón rosa..."
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#0f172a] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
                     />
                     <button
                       type="button"
@@ -526,7 +526,7 @@ const AdminPanel = () => {
 
                 {/* Imágenes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
                     Imágenes * <span className="text-gray-400">(máx. {MAX_IMAGES})</span>
                   </label>
 
@@ -539,7 +539,7 @@ const AdminPanel = () => {
                           className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                             imagesToDelete.includes(idx)
                               ? 'border-red-500 opacity-50'
-                              : 'border-gray-200 dark:border-gray-600'
+                              : 'border-gray-200 dark:border-white/10'
                           }`}
                         >
                           <img
@@ -611,9 +611,9 @@ const AdminPanel = () => {
                         disabled={isCompressing}
                         className="hidden"
                       />
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-center cursor-pointer hover:border-[#C9A96E] transition-all group">
+                      <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-4 text-center cursor-pointer hover:border-[#C9A96E] transition-all group">
                         <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1 group-hover:text-[#C9A96E] transition-colors" />
-                        <p className="text-gray-500 dark:text-gray-400 text-xs">
+                        <p className="text-gray-500 dark:text-white/60 text-xs">
                           Haz clic para subir imágenes
                         </p>
                       </div>
@@ -652,23 +652,23 @@ const AdminPanel = () => {
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-[#1e293b] rounded-2xl w-full max-w-sm p-5 shadow-2xl animate-slideIn">
+          <div className="bg-white dark:bg-[#2d2640] rounded-2xl w-full max-w-sm p-5 shadow-2xl animate-slideIn">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                 <AlertCircle className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800 dark:text-white">Eliminar producto</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Esta acción no se puede deshacer</p>
+                <p className="text-xs text-gray-500 dark:text-white/60">Esta acción no se puede deshacer</p>
               </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+            <p className="text-gray-600 dark:text-white/80 text-sm mb-4">
               ¿Eliminar <strong>{deleteConfirm.nombre}</strong>?
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-[#0f172a] transition-all text-sm"
+                className="flex-1 py-2 px-4 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-white/80 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1a1625] transition-all text-sm"
               >
                 Cancelar
               </button>
