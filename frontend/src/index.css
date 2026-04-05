@@ -37,7 +37,7 @@ code {
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: #1a1a2e;
+  background: #171717;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -170,7 +170,7 @@ input:focus, textarea:focus {
 }
 
 .dark .image-placeholder {
-  background: linear-gradient(110deg, #252542 8%, #2d2d50 18%, #252542 33%);
+  background: linear-gradient(110deg, #171717 8%, #262626 18%, #171717 33%);
   background-size: 200% 100%;
 }
 
@@ -235,24 +235,24 @@ input:focus, textarea:focus {
   }
 
   .dark {
-    --background: 235 35% 12%;
+    --background: 0 0% 9%;
     --foreground: 0 0% 95%;
-    --card: 235 30% 18%;
+    --card: 0 0% 12%;
     --card-foreground: 0 0% 95%;
-    --popover: 235 30% 18%;
+    --popover: 0 0% 12%;
     --popover-foreground: 0 0% 95%;
     --primary: 0 0% 98%;
-    --primary-foreground: 235 35% 12%;
-    --secondary: 235 25% 25%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 18%;
     --secondary-foreground: 0 0% 95%;
-    --muted: 235 25% 25%;
+    --muted: 0 0% 18%;
     --muted-foreground: 0 0% 65%;
-    --accent: 235 25% 25%;
+    --accent: 0 0% 18%;
     --accent-foreground: 0 0% 95%;
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 235 20% 25%;
-    --input: 235 20% 25%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 40 60% 50%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;

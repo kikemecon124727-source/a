@@ -301,9 +301,9 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#1a1625] dark:via-[#2d2640] dark:to-[#1a1625]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#0a0a0a] dark:via-[#171717] dark:to-[#000000]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#1a1625]/98 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#000000]/95 backdrop-blur-md border-b border-gray-100 dark:border-[#2a2a2a]">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -311,17 +311,17 @@ const AdminPanel = () => {
                 <span className="hidden sm:inline">jessicaalesuarez</span>
                 <span className="sm:hidden">jessica</span>
               </h1>
-              <p className="text-xs text-gray-500 dark:text-white/60 hidden sm:block">Panel de Administración</p>
+              <p className="text-xs text-gray-500 dark:text-[#888888] hidden sm:block">Panel de Administración</p>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs text-gray-500 dark:text-white/60 hidden md:inline truncate max-w-[150px]">
+              <span className="text-xs text-gray-500 dark:text-[#888888] hidden md:inline truncate max-w-[150px]">
                 {user?.email}
               </span>
               <ThemeToggle inline />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-gray-600 dark:text-white/80 hover:text-red-500 dark:hover:text-red-400 transition-all text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-gray-600 dark:text-[#d1d1d1] hover:text-red-500 dark:hover:text-red-400 transition-all text-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Salir</span>
@@ -342,7 +342,7 @@ const AdminPanel = () => {
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#2d2640] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0f0f0f] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
             />
           </div>
           <button
@@ -383,7 +383,7 @@ const AdminPanel = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#555555]">
                       <ImageIcon className="w-10 h-10" />
                     </div>
                   )}
@@ -392,9 +392,9 @@ const AdminPanel = () => {
                   <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                       onClick={() => openEditModal(product)}
-                      className="w-8 h-8 bg-white dark:bg-[#2d2640] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                      className="w-8 h-8 bg-white dark:bg-[#1a1a1a] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
                     >
-                      <Edit2 className="w-3.5 h-3.5 text-gray-600 dark:text-white/80" />
+                      <Edit2 className="w-3.5 h-3.5 text-gray-600 dark:text-[#d1d1d1]" />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(product)}
