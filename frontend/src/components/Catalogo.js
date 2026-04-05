@@ -137,16 +137,22 @@ const Catalogo = () => {
             Descubre nuestro catálogo
           </p>
           <div className="pt-4">
-            <ChevronLeft className="w-6 h-6 text-[#C9A96E] mx-auto rotate-[-90deg] animate-bounce" />
+            <svg className="w-6 h-6 text-[#C9A96E] mx-auto animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
           </div>
         </div>
       </section>
 
       {/* Products Grid */}
       <main className="max-w-7xl mx-auto px-4 py-12" id="catalogo">
-        <h3 className="text-2xl font-light text-gray-800 dark:text-white mb-8 text-center tracking-wide">
-          Nuestros Productos
-        </h3>
+        {/* Section Title */}
+        <div className="text-center mb-12">
+          <h3 className="text-2xl sm:text-3xl font-light text-gray-800 dark:text-white tracking-wide mb-4">
+            Nuestros Productos
+          </h3>
+          <div className="w-24 h-0.5 bg-[#C9A96E] mx-auto"></div>
+        </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-20">

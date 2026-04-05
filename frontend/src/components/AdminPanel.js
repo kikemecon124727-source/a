@@ -301,7 +301,7 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-[#EDE6DB] to-[#E5DED3] dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F5F0E8] via-[#EDE6DB] to-[#E5DED3] dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#0f172a]/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -332,7 +332,7 @@ const AdminPanel = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
@@ -429,8 +429,8 @@ const AdminPanel = () => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white/80 dark:bg-[#0f172a]/95 border-t border-gray-200 dark:border-gray-800 py-6 mt-8">
+      {/* Footer - Always at bottom */}
+      <footer className="bg-white/80 dark:bg-[#0f172a]/95 border-t border-gray-200 dark:border-gray-800 py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
           <p className="text-gray-600 dark:text-gray-400 text-sm">© 2026 jessicaalesuarez</p>
           <p className="text-gray-500 dark:text-gray-500 text-xs italic">Gracias por su preferencia ♥</p>
